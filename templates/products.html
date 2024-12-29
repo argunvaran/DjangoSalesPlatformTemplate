@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - Sales Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Our Products</h2>
+
+    {% if query %}
+        <p class="text-muted text-center">Showing results for: <strong>{{ query }}</strong></p>
+    {% endif %}
+
+    <div id="product-list" class="row">
+        <!-- Ürünler AJAX ile yüklenecek -->
+    </div>
+
+    <div id="loading" class="text-center my-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    let page = 1;  // İlk sayfa
+    let loading = false;  // Yükleme kontrolü
+    let hasNext = true;  // Daha fazla ürün var mı
+
+    function loadProducts() {
+        if (loading || !hasNext) return;  // Eğer yükleme yapılıyorsa veya daha fazla ürün yoksa çık
+        loading = true;
+        document.getElementById('loading').style.display = 'block';
+
+        const query = new URLSearchParams(window.location.search).get('q');
+        const url = `/api/products/?page=${page}${query ? `&q=${query}` : ''}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const productList = document.getElementById('product-list');
+                data.products.forEach(product => {
+                    const productCard = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card shadow-sm h-100">
+                                <img src="${product.image || 'https://via.placeholder.com/300'}" class="card-img-top" alt="${product.name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text text-muted">${product.description.slice(0, 100)}...</p>
+                                    <p class="card-text fw-bold">$${product.price}</p>
+                                    <a href="/products/${product.id}/" class="btn btn-primary w-100">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    productList.insertAdjacentHTML('beforeend', productCard);
+                });
+
+                hasNext = data.has_next;
+                if (!hasNext) {
+                    document.getElementById('loading').style.display = 'none';
+                }
+
+                page += 1;  // Sonraki sayfaya geç
+                loading = false;
+            });
+    }
+
+    // Sayfa yüklendiğinde ilk ürünleri yükle
+    document.addEventListener('DOMContentLoaded', loadProducts);
+
+    // Sayfa aşağı kaydırıldığında yeni ürünleri yükle
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+            loadProducts();
+        }
+    });
+</script>
+{% endblock %}

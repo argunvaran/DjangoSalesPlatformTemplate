@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Product{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Add New Items</h2>
+
+    <div class="row">
+        <!-- Category Form -->
+        <div class="col-md-4">
+            <h4>Category</h4>
+            <form method="POST">
+                {% csrf_token %}
+                {{ category_form.as_p }}
+                <button type="submit" name="category_submit" class="btn btn-primary w-100">Add Category</button>
+            </form>
+        </div>
+
+        <!-- Product Type Form -->
+        <div class="col-md-4">
+            <h4>Product Type</h4>
+            <form method="POST">
+                {% csrf_token %}
+                {{ product_type_form.as_p }}
+                <button type="submit" name="product_type_submit" class="btn btn-secondary w-100">Add Product Type</button>
+            </form>
+        </div>
+
+        <!-- Product Form -->
+        <div class="col-md-4">
+            <h4>Product</h4>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ product_form.as_p }}
+                <button type="submit" name="product_submit" class="btn btn-success w-100">Add Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
